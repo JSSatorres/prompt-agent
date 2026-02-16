@@ -1,0 +1,153 @@
+# Frontend Architecture & Style Guide (GTS App)
+
+Estudio de estilos y reglas del proyecto frontend **gts_app**, basado en **Next.js 13** (Pages Router) y **TypeScript**.
+
+---
+
+## 1. Tech Stack Principal
+
+| Categoría | Tecnología | Versión | Notas |
+| :--- | :--- | :--- | :--- |
+| **Core** | React | 18.2.0 | |
+| **Framework** | **Next.js** | 13.0.0 | Usa **Pages Router** (no App Router). |
+| **Lenguaje** | **TypeScript** | 4.8.4 | Strict Mode activado. |
+| **UI Library** | **MUI (Material UI)** | v5 | Componentes base (`@mui/material`, `@mui/lab`). |
+| **Styling** | **Emotion** | v11 | Motor de estilos de MUI. |
+| **State Global** | **Redux Toolkit** | 1.8.6 | Store global para datos de negocio. |
+| **State Local** | React Context | - | Para Auth, Settings, Toast, etc. |
+| **Forms** | **React Hook Form** | 7.38 | Validación con **Yup**. |
+| **Data Fetching** | **Axios** | 1.1.3 | Instancia centralizada con interceptors. |
+| **Auth** | Firebase Auth | 9.13 | JWT + Context. |
+
+---
+
+## 2. Estructura del Proyecto
+
+El proyecto sigue una arquitectura **basada en funcionalidades (features)** dentro de `src/`, separando vistas (`views`) de componentes reutilizables (`components`) y páginas de rutas (`pages`).
+
+```
+front/src/
+├── @core/               # Arquitectura base (Layouts, Theme, Utils de sistema)
+├── api/                 # Capa de servicios (Axios calls separadas por entidad)
+├── components/          # Componentes reutilizables (Search, Tickets, Tables)
+├── configs/             # Constantes globales (Theme, ACL, Auth)
+├── context/             # React Contexts (AuthContext, SettingsContext)
+├── hooks/               # Custom Hooks (useAuth, useSettings, useDebounce)
+├── layouts/             # Wrappers de página (UserLayout, BlankLayout)
+├── models/              # Interfaces TypeScript (DTOs, Props)
+├── pages/               # Rutas de Next.js (File-system routing)
+├── store/               # Redux Slices (users, material, orders)
+├── styles/              # CSS Global (globals.css, libs overrides)
+└── views/               # Componentes complejos específicos de una vista/página
+```
+
+---
+
+## 3. Reglas de Estilo (Styling Guidelines)
+
+El proyecto prioriza **MUI System** sobre CSS puro.
+
+### A. Regla de Oro: `sx` Prop
+Se utiliza la prop `sx` de MUI para estilos inline responsivos y temáticos.
+
+```tsx
+<Box sx={{ display: 'flex', gap: 2, p: 3, bgcolor: 'background.paper' }}>
+  <Typography variant="h6">Título</Typography>
+</Box>
+```
+
+### B. Theming
+Todo el tema está centralizado en `src/@core/theme`.
+- Paleta de colores, tipografías y sombras se configuran en `ThemeOptions`.
+- Soporte para **Dark/Light Mode**.
+
+### C. Iconos
+Se utiliza `@iconify/react` o imports directos de `@mui/icons-material`.
+
+---
+
+## 4. Convenciones de Código (Coding Standards)
+
+El proyecto usa **ESLint** + **Prettier** con reglas estrictas.
+
+### A. Naming Conventions
+- **Componentes**: `PascalCase` (ej. `AddReserveForm.tsx`).
+- **Hooks**: `camelCase` con prefijo `use` (ej. `useFetchMaterial.ts`).
+- **Funciones/Variables**: `camelCase` (ej. `handleSubmit`, `ticketData`).
+- **Interfaces**: `PascalCase` (ej. `TicketInterface`, `UserProps`).
+- **Carpetas**: `camelCase` generalmente, salvo componentes (`src/components/Table`).
+
+### B. Imports Order
+Orden estricto separado por líneas en blanco:
+
+1. **React Imports** (`import { useState } from 'react'`)
+2. **Next Imports** (`import Link from 'next/link'`)
+3. **MUI Imports** (`import Box from '@mui/material/Box'`)
+4. **Third Party** (`import { useForm } from 'react-hook-form'`)
+5. **Local Imports** (`import { api } from 'src/api'`)
+
+### C. TypeScript
+- **No usar `any`**: Tipar siempre props y respuestas de API.
+- **Interfaces vs Types**: Preferencia por `interface` para modelos de datos.
+
+---
+
+## 5. State Management & Data Fetching
+
+### A. Redux Toolkit (Global)
+Se usa para datos que persisten o se comparten entre muchas vistas (ej. Lista de Usuarios, Pedidos).
+- **Slices**: Definidos en `src/store/apps/`.
+- **Thunks**: `createAsyncThunk` para llamadas asíncronas dentro de Redux.
+
+```typescript
+const dispatch = useDispatch<AppDispatch>()
+const store = useSelector((state: RootState) => state.users)
+
+useEffect(() => {
+  dispatch(fetchUsers(params))
+}, [dispatch, params])
+```
+
+### B. React Hook Form (Formularios)
+Para manejo de formularios complejos.
+- Uso de `Controller` de `react-hook-form` para wrappear inputs de MUI.
+- Esquemas de validación con **Yup**.
+
+```tsx
+<Controller
+  name='email'
+  control={control}
+  render={({ field }) => (
+    <TextField {...field} label='Email' error={!!errors.email} />
+  )}
+/>
+```
+
+### C. API Layer
+Las llamadas HTTP no se hacen directamente en los componentes (salvo excepciones simples). Se centralizan en `src/api/`.
+- **Axios Instance**: Configurada con interceptors para inyectar el token `Bearer`.
+
+---
+
+## 6. Layouts & Auth
+
+- **Guards**: El sistema usa "Guards" (`AuthGuard`, `GuestGuard`) para proteger rutas.
+- **ACL (Access Control List)**: Sistema de permisos basado en `@casl/ability`. Cada página define sus permisos:
+
+```tsx
+UserList.acl = {
+  action: 'read',
+  subject: 'user-list'
+}
+```
+
+---
+
+## Resumen
+
+- Next.js 13 con TypeScript y Pages Router.
+- MUI + Emotion para estilos (prioridad a `sx`).
+- Redux Toolkit + Context API para estado.
+- React Hook Form + Yup para formularios.
+- Organización por features y convenciones de naming consistentes.
+- Autorización basada en ACL y guards.

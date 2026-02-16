@@ -1,0 +1,72 @@
+# Backend Style & Architecture Guide
+
+## 1. Project Overview
+- **Framework**: Express.js
+- **Language**: JavaScript (ES Modules)
+- **Module System**: ESM (`import`/`export`)
+- **Node Version**: LTS (implied by `package.json` engines or usage)
+
+## 2. Directory Structure (`back/src`)
+The project follows a hybrid structure, transitioning or mixing **Layered Architecture** with **Domain-Driven Design (DDD)** concepts.
+
+- **`context/`**: The Core of the DDD architecture. Organized by Modules/Bounded Contexts (e.g., `Ticket`, `Shared`).
+    - **`application/`**: Contains Use Cases (e.g., `FindTicket.js`). Classes with an `execute()` method.
+    - **`domain/`**: Contains Entities, Value Objects, and Domain Services.
+    - **`infrastructure/`**: Implementation of repositories, external services, etc.
+- **`controllers/`**: Entry points for HTTP requests. They orchestrate calls to Use Cases or execute logic directly.
+- **`routes/`**: Express router definitions mapping URLs to Controllers.
+- **`container/`**: Dependency Injection setup using `awilix`.
+- **`util/`**: Cross-cutting concerns like Database connections (`database.js`), Logging (`logger.js`), and Config.
+- **`models/`**: Likely Sequelize models for ORM usage (referenced in `app.js`).
+
+## 3. Architecture Patterns
+
+### A. Domain-Driven Design (Preferred for new/complex logic)
+- **Dependency Injection**: Uses `awilix` (`dependencyContainer.js`) to resolve dependencies.
+- **Flow**: `Route` -> `Controller` -> `diContainer.resolve('useCase')` -> `UseCase.execute()` -> `Repository` -> `Entity`.
+- **Entities**: Rich domain models (Classes) with behavior.
+    - Pattern: `toPrimitives()` for serialization and `fromPrimitives()` for hydration.
+    - Decoupled from Database schemas (mappers used in repositories).
+
+### B. Legacy / Direct Pattern (Existing in some parts)
+- **Direct Database Access**: Some controllers use `pool.query` directly with raw SQL.
+- **Flow**: `Route` -> `Controller` -> `pool.query(SQL)` -> `Response`.
+- **Use Case**: Often found in complex reporting queries or legacy endpoints (e.g., `getTicketProducts` in `ticketController.js`).
+
+## 4. Coding Standards & Style
+
+### Formatting (enforced by Prettier/ESLint)
+- **Indentation**: 2 spaces.
+- **Semicolons**: **NO** (`semi: false`).
+- **Quotes**: Single quotes (`'`).
+- **Comma**: Trailing commas where valid (ES5).
+
+### Naming Conventions
+- **Files**:
+    - **Classes/Components**: PascalCase (e.g., `Ticket.js`, `FindTicket.js`).
+    - **Utilities/Functions**: camelCase (e.g., `ticketController.js`, `database.js`).
+- **Variables & Functions**: camelCase.
+- **Constants**: UPPER_SNAKE_CASE.
+- **Database**: 
+    - Tables and Columns: snake_case (e.g., `tickets_lineas`, `id_articulo`).
+
+### Error Handling
+- **Controllers**: `try-catch` blocks.
+- **Response Format**: 
+    ```json
+    {
+      "success": false,
+      "message": "Error message"
+    }
+    ```
+- **Logging**: Uses `winston` (`logger.error`) for logging errors with context.
+
+## 5. Best Practices for This Project
+1. **New Features**: Implement using the **Context/DDD** pattern.
+    - Create Use Case in `context/<Module>/application`.
+    - Define Dependencies in `container/registrations`.
+    - Use Entities for logic.
+2. **Database**: 
+    - Use `sequelize` for ORM-style operations.
+    - Use `pool` (mysql2) for complex raw SQL queries where performance or complexity demands it.
+3. **Async/Await**: Always use `async/await` over promises chains.
