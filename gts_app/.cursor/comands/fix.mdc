@@ -1,0 +1,6 @@
+## `/fix` (Modo Reparación - Bugfix)
+**Uso:** Cuando hay un error en consola o un test fallando.
+**Acción:**
+1. Lee el error proporcionado.
+2. Invoca al agente `@03-developer`.
+3. Instrucción: "Analiza el error y aplica la corrección mínima necesaria. No refactorices nada más."

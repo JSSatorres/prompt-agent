@@ -1,0 +1,12 @@
+---
+alwaysApply: true
+---
+
+## `/fast` (Modo Express - Tarea Fácil)
+
+**Uso:** Para ajustes visuales, cambios de texto, bugs obvios o tareas de un solo archivo.
+**Acción:**
+
+1. **OMITE** la Fase 1 (Planner) y Fase 2 (QA).
+2. Invoca directamente al agente `@03-developer`.
+3. Instrucción: "Modo Express activado. Implementa este cambio directamente respetando las Styleguides. Al terminar, llama a `@04-cleaner` para pulir."

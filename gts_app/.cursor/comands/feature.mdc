@@ -1,0 +1,11 @@
+---
+alwaysApply: true
+---
+
+## `/feature` (Modo Protocolo Completo - El Bucle Dorado)
+
+**Uso:** Para implementar una nueva funcionalidad siguiendo estrictamente las 6 Fases del Capataz .
+**Descripción:** Inicia la cadena de montaje "Antigravity". No permite saltar pasos.
+**Acción:**
+
+1.  **ACTIVACIÓN:** El Capataz asume el mando absoluto en .cursor\rules\agents\Capataz.mdc

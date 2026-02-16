@@ -1,0 +1,11 @@
+---
+alwaysApply: true
+---
+
+## `/test` (Modo TDD - Solo Tests)
+
+**Uso:** Cuando solo quiero generar tests para un código existente o una idea rápida.
+**Acción:**
+
+1. Invoca al agente `@02-qa-engineer`.
+2. Instrucción: "Genera los tests unitarios/integración para el archivo abierto o la selección actual."
